@@ -14,7 +14,7 @@ const ASSETS_TO_CACHE = [
   'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js',
   'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js'
-];
+]; 
 
 // Install event - cache assets
 self.addEventListener('install', event => {

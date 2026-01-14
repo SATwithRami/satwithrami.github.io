@@ -4,474 +4,205 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Academic Grade Calculator Pro</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
-
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <!-- External Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js" defer></script>
 
-  <!-- PWA Manifest -->
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <meta name="apple-mobile-web-app-status-bar" content="#0d6efd">
-  <meta name="theme-color" content="#0d6efd" />
+  <meta name="theme-color" content="#4f46e5" />
   
-  <!-- Service Worker Registration -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(() => {
-          console.log('Service Worker registered successfully');
-        }).catch(console.warn);
-      });
-    }
-  </script> 
+    // Simple loading screen removal
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        const loading = document.getElementById('loading-screen');
+        if (loading) {
+          loading.style.opacity = '0';
+          setTimeout(() => loading.style.display = 'none', 500);
+        }
+      }, 500);
+    });
+  </script>
 </head>
 <body>
-  <!-- Loading Screen -->
-  <div id="loading-screen">
-    <div class="loader">
-      <div class="loader-circle"></div>
-      <div class="loader-text">Loading Academic Calculator Pro...</div>
+  <!-- Loading Screen (Keep it simple) -->
+  <div id="loading-screen" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#667eea;display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity 0.5s ease;">
+    <div style="text-align:center;color:white;">
+      <div style="width:60px;height:60px;border:4px solid white;border-top:4px solid transparent;border-radius:50%;margin:0 auto 20px;animation:spin 1s linear infinite;"></div>
+      <div>Loading Academic Calculator...</div>
     </div>
   </div>
 
-  <!-- Floating Action Button -->
-  <button id="fab" class="fab" title="Quick Actions">
-    <i class="fas fa-bolt"></i>
-  </button>
-
-  <!-- Fab Menu -->
-  <div id="fab-menu" class="fab-menu">
-    <button class="fab-item" data-action="scroll-top">
-      <i class="fas fa-arrow-up"></i>
-      <span>Top</span>
-    </button>
-    <button class="fab-item" data-action="quick-calc">
-      <i class="fas fa-calculator"></i>
-      <span>Calculator</span>
-    </button>
-    <button class="fab-item" data-action="export-data">
-      <i class="fas fa-download"></i>
-      <span>Export</span>
-    </button>
-    <button class="fab-item" data-action="toggle-theme">
-      <i class="fas fa-moon"></i>
-      <span>Theme</span>
-    </button>
-  </div>
+  <style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 
   <!-- Header -->
   <header class="topbar">
     <div class="brand">
-      <div class="logo-container">
-        <div class="logo-icon">
-          <i class="fas fa-graduation-cap"></i>
-        </div>
-        <div class="brand-text">
-          <h1 id="title-text">Academic Grade Calculator Pro</h1>
-          <p class="brand-subtitle">Professional Academic Assessment Tool</p>
-        </div>
+      <div class="logo">
+        <i class="fas fa-graduation-cap"></i>
       </div>
-      <span class="badge" id="az-badge">
-        <i class="fas fa-globe-americas"></i>
-        AZ | US | EU | GB
-      </span>
+      <h1 id="title-text">Akademik Qiymət Kalkulyatoru</h1>
     </div>
-
+    
     <div class="controls">
       <div class="lang-switch">
-        <button class="chip active" data-lang="az">
-          <i class="fas fa-flag"></i>
-          AZ
-        </button>
-        <button class="chip" data-lang="en">
-          <i class="fas fa-flag-usa"></i>
-          EN
-        </button>
+        <button class="chip active" data-lang="az">AZ</button>
+        <button class="chip" data-lang="en">EN</button>
       </div>
-      
-      <div class="theme-toggle">
-        <label class="switch" title="Toggle Dark Mode">
-          <input type="checkbox" id="darkToggle" />
-          <span class="slider">
-            <span class="sun"><i class="fas fa-sun"></i></span>
-            <span class="moon"><i class="fas fa-moon"></i></span>
-          </span>
-        </label>
-      </div>
-      
-      <button class="user-menu">
-        <i class="fas fa-user-circle"></i>
-      </button>
+      <label class="switch">
+        <input type="checkbox" id="darkToggle">
+        <span class="slider"></span>
+      </label>
     </div>
   </header>
 
-  <!-- Main Content -->
+  <!-- Main Calculator -->
   <main class="container">
-    <!-- Stats Overview -->
-    <div class="stats-overview">
-      <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-          <i class="fas fa-chart-line"></i>
-        </div>
-        <div class="stat-content">
-          <h3 id="stat-history">History Entries</h3>
-          <p class="stat-value" id="history-count">0</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-          <i class="fas fa-calculator"></i>
-        </div>
-        <div class="stat-content">
-          <h3 id="stat-calculations">Calculations</h3>
-          <p class="stat-value" id="calc-count">0</p>
-        </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-          <i class="fas fa-star"></i>
-        </div>
-        <div class="stat-content">
-          <h3 id="stat-average">Average Score</h3>
-          <p class="stat-value" id="avg-score">-</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Calculator Card -->
     <section class="card main-calc">
-      <div class="card-header">
-        <div class="card-title">
-          <i class="fas fa-calculator card-icon"></i>
-          <h2 id="calc-title">Grade Calculator</h2>
+      <h2><i class="fas fa-calculator"></i> <span id="calc-title">Qiymət Kalkulyatoru</span></h2>
+      
+      <div class="input-group">
+        <label for="ksq" id="label-ksq">
+          <i class="fas fa-tasks"></i> KSQ Qiymətləri (vergüllə ayırın):
+        </label>
+        <input type="text" id="ksq" placeholder="Məs: 85, 90, 78" class="input-field">
+      </div>
+      
+      <div class="input-group">
+        <label for="bsq" id="label-bsq">
+          <i class="fas fa-file-alt"></i> BSQ Qiyməti (əgər varsa):
+        </label>
+        <input type="number" id="bsq" placeholder="Məs: 92" class="input-field" min="0" max="100">
+      </div>
+      
+      <div class="input-group">
+        <label for="schemeSelect" id="label-scheme">
+          <i class="fas fa-globe"></i> Qiymətləndirmə Sistemi:
+        </label>
+        <select id="schemeSelect" class="scheme-select">
+          <option value="az">🇦🇿 Azərbaycan (KSQ 40% + BSQ 60%)</option>
+          <option value="us">🇺🇸 ABŞ GPA (4.0 sistemi)</option>
+          <option value="uk">🇬🇧 BK Faiz & Sinif</option>
+          <option value="ects">🇪🇺 ECTS (A–F)</option>
+          <option value="custom">⚙️ Özəl çəki</option>
+        </select>
+      </div>
+      
+      <!-- Custom Weights -->
+      <div id="customWeights" class="weights-container" style="display: none;">
+        <div class="weight-slider">
+          <label>KSQ Çəkisi: <span id="kqsWeightVal">40</span>%</label>
+          <input type="range" id="kqsWeight" min="0" max="100" value="40">
         </div>
-        <div class="card-actions">
-          <button class="icon-btn" title="Help" id="help-btn">
-            <i class="fas fa-question-circle"></i>
-          </button>
-          <button class="icon-btn" title="Reset" id="reset-btn">
-            <i class="fas fa-redo"></i>
-          </button>
+        <div class="weight-slider">
+          <label>BSQ Çəkisi: <span id="bsqWeightVal">60</span>%</label>
+          <input type="range" id="bsqWeight" min="0" max="100" value="60" disabled>
         </div>
       </div>
-
-      <div class="card-body">
-        <div class="input-group">
-          <label for="ksq" id="label-ksq">
-            <i class="fas fa-tasks"></i>
-            KSQ Scores (comma separated)
-          </label>
-          <div class="input-with-icon">
-            <i class="fas fa-keyboard"></i>
-            <input type="text" id="ksq" placeholder="Example: 85, 90, 78, 92" class="input-field" inputmode="decimal" />
-          </div>
-          <div class="input-hint" id="ksq-hint">Enter multiple scores separated by commas</div>
+      
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button id="btn-calc" class="btn-primary">
+          <i class="fas fa-calculator"></i> <span id="calc-btn-text">Hesabla</span>
+        </button>
+        <button id="btn-save" class="btn-secondary">
+          <i class="fas fa-save"></i> Saxla
+        </button>
+        <button id="btn-clear" class="btn-outline">
+          <i class="fas fa-trash"></i> Təmizlə
+        </button>
+      </div>
+      
+      <!-- Results -->
+      <div class="result-display">
+        <div class="result-header">
+          <h3><i class="fas fa-poll"></i> <span id="label-result">Yekun Qiymət:</span></h3>
+          <div class="result-value" id="result">-</div>
         </div>
-
-        <div class="input-group">
-          <label for="bsq" id="label-bsq">
-            <i class="fas fa-file-alt"></i>
-            BSQ Score (if available)
-          </label>
-          <div class="input-with-icon">
-            <i class="fas fa-edit"></i>
-            <input type="number" id="bsq" placeholder="Example: 92" class="input-field" min="0" max="100" step="0.1" />
-          </div>
-        </div>
-
-        <!-- Grading Scheme -->
-        <div class="grading-scheme">
-          <div class="scheme-header">
-            <label id="label-scheme">
-              <i class="fas fa-globe"></i>
-              Grading System
-            </label>
-            <div class="scheme-badges">
-              <span class="scheme-badge active" data-scheme="az">AZ</span>
-              <span class="scheme-badge" data-scheme="us">US</span>
-              <span class="scheme-badge" data-scheme="uk">UK</span>
-              <span class="scheme-badge" data-scheme="ects">EU</span>
-              <span class="scheme-badge" data-scheme="custom">Custom</span>
-            </div>
-          </div>
-          
-          <select id="schemeSelect" class="scheme-select" aria-label="Grading scheme">
-            <option value="az">🇦🇿 Azerbaijan (KSQ 40% + BSQ 60%)</option>
-            <option value="us">🇺🇸 US GPA (4.0 scale)</option>
-            <option value="uk">🇬🇧 UK Percent & Class System</option>
-            <option value="ects">🇪🇺 ECTS (A–F grading)</option>
-            <option value="custom">⚙️ Custom Weighting System</option>
-          </select>
-
-          <!-- Custom Weights -->
-          <div id="customWeights" class="weights-container hidden">
-            <div class="weight-slider-group">
-              <div class="weight-label">
-                <span>KSQ Weight</span>
-                <span class="weight-value" id="kqsWeightVal">40%</span>
-              </div>
-              <input type="range" id="kqsWeight" min="0" max="100" value="40" class="weight-slider" />
-              <div class="weight-ticks">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
-            </div>
-            
-            <div class="weight-slider-group">
-              <div class="weight-label">
-                <span>BSQ Weight</span>
-                <span class="weight-value" id="bsqWeightVal">60%</span>
-              </div>
-              <input type="range" id="bsqWeight" min="0" max="100" value="60" class="weight-slider" disabled />
-              <div class="weight-ticks">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
-            </div>
-            
-            <div class="weight-info">
-              <i class="fas fa-info-circle"></i>
-              <small id="weight-note">Default Azerbaijan 40/60 weighting. Adjust for custom systems.</small>
-            </div>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-          <button id="btn-calc" class="btn-primary btn-lg">
-            <i class="fas fa-rocket"></i>
-            <span id="calc-btn-text">Calculate Grade</span>
-          </button>
-          <button id="btn-save" class="btn-secondary">
-            <i class="fas fa-save"></i>
-            Save Result
-          </button>
-          <button id="btn-clear" class="btn-outline">
-            <i class="fas fa-trash"></i>
-            Clear History
-          </button>
-        </div>
-
-        <!-- Results Display -->
-        <div class="result-display">
-          <div class="result-header">
-            <h3 id="label-result">
-              <i class="fas fa-poll"></i>
-              Final Grade
-            </h3>
-            <div class="result-grade" id="result">-</div>
-          </div>
-          
-          <div class="result-details">
-            <div class="grade-breakdown">
-              <div class="grade-item">
-                <span class="grade-label">KSQ Average</span>
-                <span class="grade-value" id="ksq-avg">-</span>
-              </div>
-              <div class="grade-item">
-                <span class="grade-label">BSQ Score</span>
-                <span class="grade-value" id="bsq-display">-</span>
-              </div>
-              <div class="grade-item total">
-                <span class="grade-label">Final Grade</span>
-                <span class="grade-value" id="final-grade">-</span>
-              </div>
-            </div>
-            
-            <div class="converted-grades" id="converted"></div>
-          </div>
-        </div>
-
-        <!-- Tips & Insights -->
-        <div class="insights-box" id="tipsBox" aria-live="polite">
-          <div class="insights-header">
-            <i class="fas fa-lightbulb"></i>
-            <span>Performance Insights</span>
-          </div>
-          <p class="insights-text">Enter your scores to get personalized recommendations</p>
-        </div>
+        <div class="converted" id="converted"></div>
+      </div>
+      
+      <!-- Tips -->
+      <div class="tips" id="tipsBox">
+        <i class="fas fa-lightbulb"></i> <span id="tips-text">Qiymətlərinizi daxil edin</span>
       </div>
     </section>
-
-    <!-- History & Chart Section -->
-    <section class="card history-card">
-      <div class="card-header">
-        <div class="card-title">
-          <i class="fas fa-chart-bar card-icon"></i>
-          <h2 id="history-title">Performance History</h2>
-        </div>
-        <div class="card-actions">
-          <button class="icon-btn" title="Zoom In" id="zoom-in">
-            <i class="fas fa-search-plus"></i>
-          </button>
-          <button class="icon-btn" title="Zoom Out" id="zoom-out">
-            <i class="fas fa-search-minus"></i>
-          </button>
-        </div>
-      </div>
-
-      <div class="card-body">
-        <div class="chart-container">
-          <canvas id="historyChart" height="300"></canvas>
-        </div>
-        
-        <div class="history-actions">
-          <button id="btn-pdf" class="btn-secondary">
-            <i class="fas fa-file-pdf"></i>
-            Export PDF
-          </button>
-          <button id="btn-csv" class="btn-secondary">
-            <i class="fas fa-file-csv"></i>
-            Export CSV
-          </button>
-          <button id="btn-share" class="btn-outline">
-            <i class="fas fa-share-alt"></i>
-            Share Results
-          </button>
-          <button id="btn-print" class="btn-outline">
-            <i class="fas fa-print"></i>
-            Print
-          </button>
-        </div>
+    
+    <!-- History Chart -->
+    <section class="card">
+      <h2><i class="fas fa-chart-line"></i> <span id="history-title">Tarixçə</span></h2>
+      <canvas id="historyChart" height="200"></canvas>
+      <div class="action-buttons">
+        <button id="btn-pdf" class="btn-secondary">
+          <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button id="btn-csv" class="btn-secondary">
+          <i class="fas fa-file-csv"></i> CSV
+        </button>
+        <button id="btn-share" class="btn-outline">
+          <i class="fas fa-share"></i> Paylaş
+        </button>
       </div>
     </section>
-
-    <!-- Countdown & Calculator Section -->
-    <div class="side-cards">
-      <!-- Countdown Card -->
-      <section class="card countdown-card">
-        <div class="card-header">
-          <div class="card-title">
-            <i class="fas fa-clock card-icon"></i>
-            <h2 id="exam-title">Exam Countdown</h2>
-          </div>
-        </div>
-        
-        <div class="card-body">
-          <div class="countdown-input">
-            <div class="input-with-icon">
-              <i class="fas fa-calendar-alt"></i>
-              <input type="date" id="examDate" class="input-field" />
-            </div>
-            <button id="btn-countdown" class="btn-primary">
-              <i class="fas fa-play"></i>
-              Start Countdown
-            </button>
-          </div>
-          
-          <div class="countdown-display">
-            <div class="countdown-timer" id="countdown">
-              <div class="time-unit">
-                <span class="time-value">--</span>
-                <span class="time-label">Days</span>
-              </div>
-              <div class="time-unit">
-                <span class="time-value">--</span>
-                <span class="time-label">Hours</span>
-              </div>
-              <div class="time-unit">
-                <span class="time-value">--</span>
-                <span class="time-label">Minutes</span>
-              </div>
-              <div class="time-unit">
-                <span class="time-value">--</span>
-                <span class="time-label">Seconds</span>
-              </div>
-            </div>
-          </div>
-        </div>
+    
+    <!-- Countdown & Calculator -->
+    <div class="row">
+      <section class="card">
+        <h2><i class="fas fa-clock"></i> <span id="exam-title">Geri Sayım</span></h2>
+        <input type="date" id="examDate" class="input-field">
+        <button id="btn-countdown" class="btn-primary">
+          <i class="fas fa-play"></i> <span id="countdown-btn">Başlat</span>
+        </button>
+        <div class="countdown" id="countdown">-</div>
       </section>
-
-      <!-- Calculator Card -->
-      <section class="card calculator-card">
-        <div class="card-header">
-          <div class="card-title">
-            <i class="fas fa-calculator card-icon"></i>
-            <h2 id="calc-box-title">Quick Calculator</h2>
-          </div>
-          <div class="card-actions">
-            <button class="icon-btn" id="calc-clear">
-              <i class="fas fa-backspace"></i>
-            </button>
-          </div>
-        </div>
-        
-        <div class="card-body">
-          <input type="text" id="resultCalc" readonly class="calc-display" />
+      
+      <section class="card">
+        <h2><i class="fas fa-calculator"></i> <span id="calc-box-title">Kalkulyator</span></h2>
+        <input type="text" id="resultCalc" readonly class="calc-display">
+        <div class="calc-buttons">
+          <button data-c="C">C</button>
+          <button data-c="B"><i class="fas fa-backspace"></i></button>
+          <button data-c="%">%</button>
+          <button data-c="/">/</button>
           
-          <div class="calc-buttons">
-            <button data-c="C" class="calc-btn operator">C</button>
-            <button data-c="B" class="calc-btn operator">
-              <i class="fas fa-backspace"></i>
-            </button>
-            <button data-c="%" class="calc-btn operator">%</button>
-            <button data-c="/" class="calc-btn operator">÷</button>
-
-            <button data-c="7" class="calc-btn number">7</button>
-            <button data-c="8" class="calc-btn number">8</button>
-            <button data-c="9" class="calc-btn number">9</button>
-            <button data-c="*" class="calc-btn operator">×</button>
-
-            <button data-c="4" class="calc-btn number">4</button>
-            <button data-c="5" class="calc-btn number">5</button>
-            <button data-c="6" class="calc-btn number">6</button>
-            <button data-c="-" class="calc-btn operator">−</button>
-
-            <button data-c="1" class="calc-btn number">1</button>
-            <button data-c="2" class="calc-btn number">2</button>
-            <button data-c="3" class="calc-btn number">3</button>
-            <button data-c="+" class="calc-btn operator">+</button>
-
-            <button data-c="0" class="calc-btn number zero">0</button>
-            <button data-c="." class="calc-btn number">.</button>
-            <button data-c="=" class="calc-btn equals">=</button>
-          </div>
+          <button data-c="7">7</button>
+          <button data-c="8">8</button>
+          <button data-c="9">9</button>
+          <button data-c="*">×</button>
+          
+          <button data-c="4">4</button>
+          <button data-c="5">5</button>
+          <button data-c="6">6</button>
+          <button data-c="-">-</button>
+          
+          <button data-c="1">1</button>
+          <button data-c="2">2</button>
+          <button data-c="3">3</button>
+          <button data-c="+">+</button>
+          
+          <button data-c="0" style="grid-column: span 2;">0</button>
+          <button data-c=".">.</button>
+          <button data-c="=" class="equals">=</button>
         </div>
       </section>
     </div>
   </main>
-
-  <!-- Footer -->
+  
   <footer class="footer">
-    <div class="footer-content">
-      <div class="footer-brand">
-        <div class="footer-logo">
-          <i class="fas fa-graduation-cap"></i>
-        </div>
-        <div class="footer-text">
-          <h3>Academic Grade Calculator Pro</h3>
-          <p>Professional tool for academic performance assessment</p>
-        </div>
-      </div>
-      
-      <div class="footer-links">
-        <a href="#" class="footer-link"><i class="fas fa-info-circle"></i> About</a>
-        <a href="#" class="footer-link"><i class="fas fa-shield-alt"></i> Privacy</a>
-        <a href="#" class="footer-link"><i class="fas fa-file-contract"></i> Terms</a>
-        <a href="#" class="footer-link"><i class="fas fa-envelope"></i> Contact</a>
-      </div>
-      
-      <div class="footer-copyright">
-        <small>© <span id="year"></span> Ramin Huseynov — Academic Calculator Pro • PWA</small>
-        <div class="footer-social">
-          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
-          <a href="#" class="social-icon"><i class="fab fa-linkedin"></i></a>
-        </div>
-      </div>
-    </div>
+    <small>© <span id="year"></span> Ramin Huseynov — Akademik Kalkulyator</small>
   </footer>
-
-  <!-- Scripts -->
-  <script src="script.js" defer></script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
